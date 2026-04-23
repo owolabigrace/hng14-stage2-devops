@@ -8,42 +8,38 @@ on:
 jobs:
 
   lint:
-    runs-on: ubuntu-latest
+   runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+   steps:
+    - uses: actions/checkout@v4
 
-      # Python lint
-      - name: Install Python deps
-        run: pip install flake8
+    - name: Install Python deps
+      run: pip install flake8
 
-      - name: Run flake8
-        run: flake8 api worker
+    - name: Run flake8
+      run: flake8 api worker
 
-      # JS lint
-      - name: Install Node deps
-        run: |
-          cd frontend
-          npm install
+    - name: Install Node deps
+      run: |
+        cd frontend
+        npm install
 
-      - name: Run eslint
-        run: |
-          cd frontend
-          npx eslint . --config .eslintrc.json
+    - name: Run eslint
+      run: |
+        cd frontend
+        npx eslint . --config .eslintrc.json
 
-      # Docker lint
-      -  name: Install hadolint
-         run: |
-           wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
-           chmod +x hadolint
-           sudo mv hadolint /usr/local/bin/
+    - name: Install hadolint
+      run: |
+        wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+        chmod +x hadolint
+        sudo mv hadolint /usr/local/bin/
 
-      -  name: Run hadolint
-         run: |
-           hadolint api/Dockerfile || true
-           hadolint worker/Dockerfile || true
-           hadolint frontend/Dockerfile || true
-
+    - name: Run hadolint (STRICT FIX)
+      run: |
+        hadolint api/Dockerfile
+        hadolint worker/Dockerfile
+        hadolint frontend/Dockerfile
   test:
     runs-on: ubuntu-latest
     needs: lint
