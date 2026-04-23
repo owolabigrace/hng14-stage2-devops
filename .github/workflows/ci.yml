@@ -32,13 +32,17 @@ jobs:
           npx eslint . --config .eslintrc.json
 
       # Docker lint
-      - name: Hadolint
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: |
-            api/Dockerfile
-            worker/Dockerfile
-            frontend/Dockerfile
+      -  name: Install hadolint
+         run: |
+           wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+           chmod +x hadolint
+           sudo mv hadolint /usr/local/bin/
+
+      -  name: Run hadolint
+         run: |
+           hadolint api/Dockerfile
+           hadolint worker/Dockerfile
+           hadolint frontend/Dockerfile
 
   test:
     runs-on: ubuntu-latest
