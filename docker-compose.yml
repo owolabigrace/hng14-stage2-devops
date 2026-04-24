@@ -29,22 +29,22 @@ services:
       redis:
         condition: service_healthy
     environment:
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
-      QUEUE_NAME: ${QUEUE_NAME}
-    ports:
-      - "8000:8000"
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      QUEUE_NAME: ${QUEUE_NAME:-jobs}
+    expose:
+      - "8000"
     networks:
       - app-network
 
     deploy:
-       resources:
+      resources:
         limits:
           cpus: "0.50"
           memory: 256M
 
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 5s
       timeout: 3s
       retries: 5
