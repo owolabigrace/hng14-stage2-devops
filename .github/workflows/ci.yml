@@ -64,7 +64,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r api/requirements.txt
-          pip install pytest pytest-cov fakeredis httpx
+          pip install pytest pytest-cov fakeredis 
 
       - name: Run tests
         run: |
