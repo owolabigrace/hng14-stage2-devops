@@ -122,6 +122,9 @@ jobs:
       - name: Build Docker image
         run: docker build -t api:${{ github.sha }} ./api
 
+      - name: Show Trivy findings (debug)
+        run: trivy image api:${{ github.sha }}
+
       - name: Run Trivy scan (SARIF)
         uses: aquasecurity/trivy-action@master
         with:
@@ -131,9 +134,6 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: 1
-
-      - name: Show Trivy findings (debug)
-        run: trivy image api:${{ github.sha }}
 
       - name: Upload SARIF report
         uses: actions/upload-artifact@v4
