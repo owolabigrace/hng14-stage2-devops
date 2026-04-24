@@ -28,7 +28,7 @@ jobs:
       - name: Run eslint
         run: |
           cd frontend
-          ./node_modules/.bin/eslint . --config .eslintrc.json
+          npm run lint
 
       - name: Install hadolint
         run: |
