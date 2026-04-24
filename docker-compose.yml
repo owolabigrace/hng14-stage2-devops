@@ -7,11 +7,20 @@ services:
       - app-network
     expose:
       - "6379"
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
+
+    
 
   api:
     build: ./api
@@ -20,13 +29,20 @@ services:
       redis:
         condition: service_healthy
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      QUEUE_NAME: jobs
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      QUEUE_NAME: ${QUEUE_NAME}
     ports:
       - "8000:8000"
     networks:
       - app-network
+
+    deploy:
+       resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 5s
@@ -40,11 +56,17 @@ services:
       redis:
         condition: service_healthy
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      QUEUE_NAME: jobs
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      QUEUE_NAME: ${QUEUE_NAME}
     networks:
       - app-network
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
     healthcheck:
       test: ["CMD", "pgrep", "-f", "worker.py"]
       interval: 5s
@@ -58,11 +80,19 @@ services:
       api:
         condition: service_healthy
     environment:
-      API_URL: http://api:8000
+      API_URL: ${API_URL}
     ports:
       - "3000:3000"
     networks:
       - app-network
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+
+
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
       interval: 10s

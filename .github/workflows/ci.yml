@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
 
       - name: Install Python deps
         run: pip install flake8
@@ -58,8 +59,14 @@ jobs:
           --health-timeout 3s
           --health-retries 5
 
+      registry:   
+          image: registry:2
+          ports:
+            - 5000:5000
+
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -82,14 +89,26 @@ jobs:
     needs: test
 
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
 
-      - name: Build images
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.docker-cache
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+
+      - name: Build and tag images
         run: |
-          docker build -t api:${{ github.sha }} ./api
-          docker build -t worker:${{ github.sha }} ./worker
-          docker build -t frontend:${{ github.sha }} ./frontend
+          docker build -t localhost:5000/api:latest -t localhost:5000/api:${{ github.sha }} ./api
+          docker build -t localhost:5000/worker:latest -t localhost:5000/worker:${{ github.sha }} ./worker
+          docker build -t localhost:5000/frontend:latest -t localhost:5000/frontend:${{ github.sha }} ./frontend
 
+      - name: Simulate rolling update
+        run: |
+          docker compose up -d --build
+          docker compose up -d --scale api=2
+          docker compose up -d --no-deps --build api
 
   
   security:
@@ -97,7 +116,19 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy scan (SARIF)
+        run: |
+          docker build -t api:${{ github.sha }} ./api
+          trivy image --format sarif --output results.sarif api:${{ github.sha }}
+
+      -  name: Upload Trivy SARIF
+         uses: actions/upload-artifact@v4
+         with:
+           name: trivy-report
+           path: results.sarif
 
       - name: Scan API image with Trivy
         uses: aquasecurity/trivy-action@master
@@ -116,8 +147,16 @@ jobs:
     needs: security
 
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
 
+      - name: Run integration script
+        run: bash test_integration.sh
+        
+      - name: Use secret example
+        env:
+          API_URL: ${{ secrets.API_URL }}
+        run: echo "Using secret"
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
@@ -167,7 +206,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout code
+        uses: actions/checkout@v4
 
       - name: Deploy simulation
         run: |
