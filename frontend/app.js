@@ -28,6 +28,10 @@ app.get('/status/:id', async (req, res) => {
   }
 });
 
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 app.listen(3000, "0.0.0.0", () => {
   console.log('Frontend running on port 3000');
 });
