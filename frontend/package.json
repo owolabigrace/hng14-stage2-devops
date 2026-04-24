@@ -4,7 +4,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "lint": "eslint . --config .eslintrc.json"
+    "lint": "node node_modules/eslint/bin/eslint.js . --config .eslintrc.json"
   },
   "dependencies": {
     "express": "^4.18.2",
