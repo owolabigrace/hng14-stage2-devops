@@ -17,7 +17,8 @@ USER app
 
 EXPOSE 3000
 
-HEALTHCHECK CMD node -e "require('http').get('http://api:3000', res => process.exit(res.statusCode === 200 ? 0 : 1))"
+HEALTHCHECK CMD wget -q --spider http://localhost:3000 || exit 1
+
 
 
 CMD ["npm", "start"]

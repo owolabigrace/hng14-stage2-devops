@@ -16,7 +16,7 @@
 
 ## Frontend app.js
 - Issue: API URL hardcoded to localhost
-- Fix: Changed to process.env.API_URL
+- Fix: Changed to process.env.API_U
 
 ## Worker
 - Issue: Could not connect to Redis in container
