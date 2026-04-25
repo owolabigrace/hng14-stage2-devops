@@ -28,3 +28,10 @@ def test_get_job():
     res2 = client.get(f"/jobs/{job_id}")
     assert res2.status_code == 200
     assert res2.json()["status"] == "queued"
+
+    import fakeredis
+
+    def test_redis_mock():
+        r = fakeredis.FakeRedis()
+        r.set("key", "value")
+        assert r.get("key") == b"value"
